@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <!-- viewport-fit=cover garante aproveitamento total da tela em iPhones com notch/Dynamic Island -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0A0A0A" />
+  <title>ZAVA VISIT | Jardins Itália — Experiência 3D</title>
+
+  <!-- Tipografia sofisticada: Cinzel (títulos/marca de alto padrão) e Plus Jakarta Sans (leitura limpa na UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS via CDN com configuração da paleta Zava Visit -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            zava: {
+              black: '#0A0A0A',
+              surface: '#121214',
+              gold: '#D4AF37',
+              goldLight: '#F3E5AB',
+              leisure: '#38BDF8',
+              graphite: '#52525B'
+            }
+          },
+          fontFamily: {
+            brand: ['Cinzel', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Estilos customizados (Glassmorphism, 100dvh, Safe Areas e Atmosfera Base) -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="bg-zava-black text-white font-sans antialiased selection:bg-zava-gold selection:text-zava-black overflow-hidden">
+
+  <!-- =========================================================================
+       1. CONTAINER DO MAPA 3D (FUNDO EM TELA INTEIRA)
+       Ocupa 100% da viewport dinâmica (100dvh) e receberá o canvas WebGL/Three.js
+       ========================================================================= -->
+  <main id="canvas-container" aria-label="Visualizador 3D do Condomínio">
+    <!-- Grade arquitetônica sutil e placeholder central enquanto o motor 3D não é acoplado -->
+    <div id="canvas-placeholder" class="flex flex-col items-center justify-center text-center px-6 pointer-events-none select-none">
+      <div class="w-16 h-16 rounded-full border border-zava-gold/30 flex items-center justify-center mb-4 bg-zava-gold/5 shadow-[0_0_30px_rgba(212,175,55,0.15)]">
+        <svg class="w-7 h-7 text-zava-gold" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+        </svg>
+      </div>
+      <span class="text-[11px] uppercase tracking-[0.28em] text-zava-gold/80 font-semibold mb-1">
+        Ambiente WebGL Preparado
+      </span>
+      <p class="text-xs sm:text-sm text-white/45 max-w-xs font-normal">
+        Container <code class="text-white/70 font-mono">#canvas-container</code> pronto para renderização 3D interativa.
+      </p>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       2. INTERFACE SOBREPOSTA (HUD GLASSMORPHISM)
+       Camada fixa com pointer-events-none para deixar o toque passar para o mapa 3D,
+       ativando pointer-events-auto apenas nos cartões interativos do topo e rodapé.
+       ========================================================================= -->
+  <div id="hud-overlay" class="fixed inset-0 z-10 pointer-events-none flex flex-col justify-between safe-viewport-padding">
+
+    <!-- TOPO FLUTUANTE: Marca ZAVA VISIT + Seletor/Indicador do Condomínio -->
+    <header class="w-full max-w-5xl mx-auto flex items-center justify-between gap-3 pointer-events-auto">
+      <div class="glass-panel w-full px-4 py-3 sm:px-6 sm:py-3.5 rounded-2xl flex items-center justify-between gap-3">
+        
+        <!-- Identidade da Marca -->
+        <div class="flex items-center gap-3">
+          <div class="w-2 h-8 rounded-full bg-gradient-to-b from-zava-goldLight via-zava-gold to-amber-700 shadow-[0_0_12px_rgba(212,175,55,0.6)]" aria-hidden="true"></div>
+          <div>
+            <h1 class="font-brand text-base sm:text-xl font-bold tracking-[0.22em] text-zava-gold leading-none">
+              ZAVA VISIT
+            </h1>
+            <p class="text-[10px] sm:text-xs text-white/55 tracking-wider uppercase mt-1">
+              Masterplan Interativo 3D
+            </p>
+          </div>
+        </div>
+
+        <!-- Seletor / Indicador do Condomínio Atual -->
+        <button
+          id="condo-selector-btn"
+          type="button"
+          class="group flex items-center gap-2.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] border border-zava-gold/30 hover:border-zava-gold/60 transition-all duration-200"
+          aria-label="Condomínio selecionado: Jardins Itália"
+        >
+          <!-- Ícone de localização dourado -->
+          <span class="flex h-2 w-2 relative" aria-hidden="true">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-zava-gold opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-zava-gold"></span>
+          </span>
+
+          <div class="text-left">
+            <span class="block text-[9px] uppercase tracking-widest text-white/45 leading-none">
+              Condomínio
+            </span>
+            <span id="current-condo-name" class="block text-xs sm:text-sm font-semibold text-white group-hover:text-zava-goldLight transition-colors mt-0.5">
+              Jardins Itália
+            </span>
+          </div>
+
+          <svg class="w-4 h-4 text-zava-gold/70 group-hover:text-zava-gold transition-transform duration-200 group-hover:translate-y-0.5 ml-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </button>
+
+      </div>
+    </header>
+
+    <!-- RODAPÉ FLUTUANTE COMPACTO: Legenda de Status do Mapa -->
+    <footer class="w-full max-w-xl mx-auto pointer-events-auto">
+      <nav
+        aria-label="Legenda de status do mapa"
+        class="glass-panel px-3.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:gap-x-7"
+      >
+        <!-- Item 1: Lotes Disponíveis (Dourado) -->
+        <div class="legend-item flex items-center gap-2" data-status="disponivel">
+          <span class="legend-dot legend-dot--gold" aria-hidden="true"></span>
+          <span class="text-xs sm:text-sm font-medium text-white/90 tracking-tight">
+            Lotes Disponíveis
+          </span>
+        </div>
+
+        <!-- Divisor vertical sutil (visível em telas maiores) -->
+        <span class="hidden sm:inline-block h-3.5 w-[1px] bg-white/10" aria-hidden="true"></span>
+
+        <!-- Item 2: Áreas de Lazer (Azul/Ciano elegante) -->
+        <div class="legend-item flex items-center gap-2" data-status="lazer">
+          <span class="legend-dot legend-dot--leisure" aria-hidden="true"></span>
+          <span class="text-xs sm:text-sm font-medium text-white/90 tracking-tight">
+            Áreas de Lazer
+          </span>
+        </div>
+
+        <!-- Divisor vertical sutil (visível em telas maiores) -->
+        <span class="hidden sm:inline-block h-3.5 w-[1px] bg-white/10" aria-hidden="true"></span>
+
+        <!-- Item 3: Lotes Indisponíveis (Grafite) -->
+        <div class="legend-item flex items-center gap-2" data-status="indisponivel">
+          <span class="legend-dot legend-dot--unavailable" aria-hidden="true"></span>
+          <span class="text-xs sm:text-sm font-medium text-white/60 tracking-tight">
+            Lotes Indisponíveis
+          </span>
+        </div>
+      </nav>
+    </footer>
+
+  </div>
+
+  <!-- Script principal da aplicação -->
+  <script src="js/main.js"></script>
+</body>
+</html>

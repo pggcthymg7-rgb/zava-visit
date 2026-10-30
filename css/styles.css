@@ -1,0 +1,137 @@
+/* ==========================================================================
+   ZAVA VISIT — Folha de Estilos Base (Issue #1: Mobile-First & Identidade Visual)
+   Paleta Oficial:
+   - Preto Profundo (Fundo): #0A0A0A
+   - Branco Puro (Texto):    #FFFFFF
+   - Dourado Nobre (Marca):  #D4AF37
+   - Azul/Ciano (Lazer):     #38BDF8
+   - Grafite (Indisponível): #52525B
+   ========================================================================== */
+
+:root {
+  --zava-black: #0A0A0A;
+  --zava-gold: #D4AF37;
+  --zava-gold-glow: rgba(212, 175, 55, 0.45);
+  --zava-leisure: #38BDF8;
+  --zava-leisure-glow: rgba(56, 189, 248, 0.4);
+  --zava-unavailable: #52525B;
+}
+
+/* --------------------------------------------------------------------------
+   1. RESET E ALTURA DINÂMICA (100dvh)
+   O uso de 100dvh (Dynamic Viewport Height) resolve o problema clássico do
+   Safari no iPhone onde a barra de endereço cobria o rodapé ao usar 100vh.
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh; /* Fallback para navegadores antigos */
+  height: 100dvh;
+  background-color: var(--zava-black);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* --------------------------------------------------------------------------
+   2. CONTAINER DO CANVAS 3D (#canvas-container)
+   Ocupa toda a área da tela ao fundo e bloqueia gestos nativos de rolagem
+   (touch-action: none) para permitir rotação e zoom fluidos na cena 3D.
+   -------------------------------------------------------------------------- */
+#canvas-container {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  z-index: 0;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Atmosfera escura com leve vinheta dourada ao centro e grade arquitetônica sutil */
+  background:
+    radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.07) 0%, rgba(10, 10, 10, 0.96) 70%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+/* Garante que o futuro elemento <canvas> gerado pelo Three.js ocupe 100% */
+#canvas-container canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   3. SAFE AREAS PARA DISPOSITIVOS MOBILE (iPhone Notch / Home Indicator)
+   Mantém os painéis flutuantes afastados das bordas físicas e barras do iOS.
+   -------------------------------------------------------------------------- */
+.safe-viewport-padding {
+  padding-top: max(0.875rem, env(safe-area-inset-top));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  padding-left: max(0.875rem, env(safe-area-inset-left));
+  padding-right: max(0.875rem, env(safe-area-inset-right));
+}
+
+@media (min-width: 640px) {
+  .safe-viewport-padding {
+    padding-top: max(1.5rem, env(safe-area-inset-top));
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+    padding-left: max(1.5rem, env(safe-area-inset-left));
+    padding-right: max(1.5rem, env(safe-area-inset-right));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. HUD EM GLASSMORPHISM ESCURO / FOSCO (.glass-panel)
+   Transparência calibrada + desfoque de fundo + borda sutil iluminada.
+   -------------------------------------------------------------------------- */
+.glass-panel {
+  background: rgba(14, 14, 17, 0.76);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 12px 32px -8px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* --------------------------------------------------------------------------
+   5. INDICADORES DA LEGENDA DE STATUS (.legend-dot)
+   Pontos luminosos que identificam cada categoria do mapa.
+   -------------------------------------------------------------------------- */
+.legend-dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 9999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Lotes Disponíveis: Dourado (#D4AF37) */
+.legend-dot--gold {
+  background-color: var(--zava-gold);
+  box-shadow: 0 0 10px var(--zava-gold-glow);
+}
+
+/* Áreas de Lazer: Azul/Ciano elegante (#38BDF8) */
+.legend-dot--leisure {
+  background-color: var(--zava-leisure);
+  box-shadow: 0 0 10px var(--zava-leisure-glow);
+}
+
+/* Lotes Indisponíveis: Grafite (#52525B) */
+.legend-dot--unavailable {
+  background-color: var(--zava-unavailable);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
