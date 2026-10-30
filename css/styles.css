@@ -1,26 +1,32 @@
 /* ==========================================================================
-   ZAVA VISIT — Folha de Estilos Base (Issue #1: Mobile-First & Identidade Visual)
-   Paleta Oficial:
-   - Preto Profundo (Fundo): #0A0A0A
-   - Branco Puro (Texto):    #FFFFFF
-   - Dourado Nobre (Marca):  #D4AF37
-   - Azul/Ciano (Lazer):     #38BDF8
-   - Grafite (Indisponível): #52525B
+   ZAVA VISIT — Folha de Estilos Oficial (Issue #1: Identidade Zava Imobiliária)
+   Paleta Oficial Zava Imobiliária:
+   - Azul-Noite (Fundo Principal):    #1a1d29 (zava-night)
+   - Grafite (Superfícies/Contexto):  #3d3f4a (zava-graphite)
+   - Areia (Destaque Nobre/Marca):    #d2c2ac (zava-sand)
+   - Prata (Textos Secundários):      #b1b2b5 (zava-silver)
+   - Platina (Textos Principais):     #e6e6e6 (zava-platinum)
+   - Champagne (Tipologia Triplex):   #e5d5c0 (zava-champagne)
+   - Esmeralda (Áreas de Lazer):      #34d399 (zava-emerald)
    ========================================================================== */
 
 :root {
-  --zava-black: #0A0A0A;
-  --zava-gold: #D4AF37;
-  --zava-gold-glow: rgba(212, 175, 55, 0.45);
-  --zava-leisure: #38BDF8;
-  --zava-leisure-glow: rgba(56, 189, 248, 0.4);
-  --zava-unavailable: #52525B;
+  --zava-night: #1a1d29;
+  --zava-graphite: #3d3f4a;
+  --zava-sand: #d2c2ac;
+  --zava-sand-glow: rgba(210, 194, 172, 0.35);
+  --zava-silver: #b1b2b5;
+  --zava-platinum: #e6e6e6;
+  --zava-champagne: #e5d5c0;
+  --zava-champagne-glow: rgba(229, 213, 192, 0.55);
+  --zava-emerald: #34d399;
+  --zava-emerald-glow: rgba(52, 211, 153, 0.45);
 }
 
 /* --------------------------------------------------------------------------
    1. RESET E ALTURA DINÂMICA (100dvh)
-   O uso de 100dvh (Dynamic Viewport Height) resolve o problema clássico do
-   Safari no iPhone onde a barra de endereço cobria o rodapé ao usar 100vh.
+   O uso de 100dvh garante que a barra dinâmica do Safari (iOS) nunca esconda
+   a barra inferior de tipologias.
    -------------------------------------------------------------------------- */
 *,
 *::before,
@@ -36,15 +42,16 @@ body {
   width: 100%;
   height: 100vh; /* Fallback para navegadores antigos */
   height: 100dvh;
-  background-color: var(--zava-black);
+  background-color: var(--zava-night);
+  color: var(--zava-platinum);
   overflow: hidden;
   overscroll-behavior: none;
 }
 
 /* --------------------------------------------------------------------------
    2. CONTAINER DO CANVAS 3D (#canvas-container)
-   Ocupa toda a área da tela ao fundo e bloqueia gestos nativos de rolagem
-   (touch-action: none) para permitir rotação e zoom fluidos na cena 3D.
+   Atmosfera em Azul-Noite (#1a1d29) com grade sutil inspirada nas quadras em
+   Grafite (#3d3f4a) e iluminação difusa em Areia (#d2c2ac) ao centro.
    -------------------------------------------------------------------------- */
 #canvas-container {
   position: fixed;
@@ -56,12 +63,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Atmosfera escura com leve vinheta dourada ao centro e grade arquitetônica sutil */
   background:
-    radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.07) 0%, rgba(10, 10, 10, 0.96) 70%),
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 100% 100%, 40px 40px, 40px 40px;
+    radial-gradient(circle at 50% 48%, rgba(210, 194, 172, 0.09) 0%, rgba(61, 63, 74, 0.18) 38%, rgba(26, 29, 41, 0.98) 78%),
+    linear-gradient(to right, rgba(177, 178, 181, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(177, 178, 181, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 44px 44px, 44px 44px;
 }
 
 /* Garante que o futuro elemento <canvas> gerado pelo Three.js ocupe 100% */
@@ -74,7 +80,6 @@ body {
 
 /* --------------------------------------------------------------------------
    3. SAFE AREAS PARA DISPOSITIVOS MOBILE (iPhone Notch / Home Indicator)
-   Mantém os painéis flutuantes afastados das bordas físicas e barras do iOS.
    -------------------------------------------------------------------------- */
 .safe-viewport-padding {
   padding-top: max(0.875rem, env(safe-area-inset-top));
@@ -93,45 +98,112 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   4. HUD EM GLASSMORPHISM ESCURO / FOSCO (.glass-panel)
-   Transparência calibrada + desfoque de fundo + borda sutil iluminada.
+   4. HUD EM GLASSMORPHISM OFICIAL ZAVA (.glass-panel e .zava-emblem)
+   Combina Azul-Noite translúcido (#1a1d29) com borda Grafite/Areia sutil.
    -------------------------------------------------------------------------- */
 .glass-panel {
-  background: rgba(14, 14, 17, 0.76);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(26, 29, 41, 0.82);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(210, 194, 172, 0.16);
   box-shadow:
-    0 12px 32px -8px rgba(0, 0, 0, 0.75),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    0 14px 36px -8px rgba(10, 12, 18, 0.78),
+    inset 0 1px 0 0 rgba(230, 230, 230, 0.08);
+}
+
+/* Emblema geométrico do símbolo "Z" no Header */
+.zava-emblem {
+  background: linear-gradient(145deg, rgba(61, 63, 74, 0.65) 0%, rgba(26, 29, 41, 0.95) 100%);
+  border: 1px solid rgba(210, 194, 172, 0.35);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(230, 230, 230, 0.12);
 }
 
 /* --------------------------------------------------------------------------
-   5. INDICADORES DA LEGENDA DE STATUS (.legend-dot)
-   Pontos luminosos que identificam cada categoria do mapa.
+   5. BARRA INTERATIVA DE TIPOLOGIAS E LAZER (Scroll Horizontal Sem Scrollbar)
    -------------------------------------------------------------------------- */
-.legend-dot {
-  width: 0.65rem;
-  height: 0.65rem;
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE e Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari e Opera */
+}
+
+/* Estado padrão dos botões de filtro no rodapé */
+.category-btn {
+  color: var(--zava-silver);
+  background-color: rgba(61, 63, 74, 0.28);
+  border: 1px solid rgba(177, 178, 181, 0.12);
+  cursor: pointer;
+  user-select: none;
+}
+
+.category-btn:hover {
+  color: var(--zava-platinum);
+  background-color: rgba(61, 63, 74, 0.55);
+  border-color: rgba(210, 194, 172, 0.35);
+}
+
+.category-btn:active {
+  transform: scale(0.97);
+}
+
+/* Estado visual ATIVO: Borda e fundo em tom Areia (#d2c2ac) */
+.category-btn.is-active {
+  color: var(--zava-platinum);
+  background-color: rgba(210, 194, 172, 0.18);
+  border-color: var(--zava-sand);
+  box-shadow:
+    0 0 18px rgba(210, 194, 172, 0.18),
+    inset 0 1px 0 rgba(230, 230, 230, 0.16);
+}
+
+/* --------------------------------------------------------------------------
+   6. INDICADORES DE COR POR TIPOLOGIA (.category-dot)
+   -------------------------------------------------------------------------- */
+.category-dot {
+  width: 0.6rem;
+  height: 0.6rem;
   border-radius: 9999px;
   display: inline-block;
   flex-shrink: 0;
 }
 
-/* Lotes Disponíveis: Dourado (#D4AF37) */
-.legend-dot--gold {
-  background-color: var(--zava-gold);
-  box-shadow: 0 0 10px var(--zava-gold-glow);
+/* Todos: Ponto Areia com anel duplo */
+.category-dot--all {
+  background-color: var(--zava-sand);
+  box-shadow: 0 0 0 2px rgba(210, 194, 172, 0.28);
 }
 
-/* Áreas de Lazer: Azul/Ciano elegante (#38BDF8) */
-.legend-dot--leisure {
-  background-color: var(--zava-leisure);
-  box-shadow: 0 0 10px var(--zava-leisure-glow);
+/* Casas Térreas: Areia (#d2c2ac) */
+.category-dot--sand {
+  background-color: var(--zava-sand);
+  box-shadow: 0 0 8px var(--zava-sand-glow);
 }
 
-/* Lotes Indisponíveis: Grafite (#52525B) */
-.legend-dot--unavailable {
-  background-color: var(--zava-unavailable);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+/* Sobrados: Platina (#e6e6e6) */
+.category-dot--platinum {
+  background-color: var(--zava-platinum);
+  box-shadow: 0 0 8px rgba(230, 230, 230, 0.35);
+}
+
+/* Triplex: Dourado Pálido / Champagne (#e5d5c0) com brilho sutil */
+.category-dot--champagne {
+  background-color: var(--zava-champagne);
+  box-shadow: 0 0 11px var(--zava-champagne-glow);
+}
+
+/* Lotes: Prata (#b1b2b5) com borda Areia (#d2c2ac) */
+.category-dot--lots {
+  background-color: var(--zava-silver);
+  border: 1.5px solid var(--zava-sand);
+}
+
+/* Áreas de Lazer: Verde Esmeralda/Água sofisticado (#34d399) */
+.category-dot--leisure {
+  background-color: var(--zava-emerald);
+  box-shadow: 0 0 10px var(--zava-emerald-glow);
 }
