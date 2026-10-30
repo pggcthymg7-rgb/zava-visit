@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <!-- viewport-fit=cover garante aproveitamento total da tela em iPhones com notch/Dynamic Island -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1d29" />
+  <title>ZAVA VISIT | Jardins Itália — Curadoria Imobiliária 3D</title>
+
+  <!-- Tipografia Oficial Zava Imobiliária: Urbanist (pesos 300, 400, 500, 600, 700) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS via CDN com a Paleta Oficial da Zava Imobiliária -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            zava: {
+              night: '#1a1d29',      // Azul-Noite: Fundo principal e atmosfera do mapa
+              graphite: '#3d3f4a',   // Grafite: Superfícies secundárias, bordas e contexto das quadras
+              sand: '#d2c2ac',       // Areia: Cor de destaque nobre principal da marca
+              silver: '#b1b2b5',     // Prata: Textos secundários, subtítulos e metadados
+              platinum: '#e6e6e6',   // Platina: Textos principais e títulos de alta leitura
+              champagne: '#e5d5c0',  // Dourado Pálido/Champagne: Tipologia Triplex
+              emerald: '#34d399'     // Verde Esmeralda/Água: Áreas de Lazer e verdes do condomínio
+            }
+          },
+          fontFamily: {
+            sans: ['Urbanist', 'sans-serif'],
+            brand: ['Urbanist', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Estilos customizados (Glassmorphism Zava, 100dvh, Safe Areas e Botões de Tipologia) -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="bg-zava-night text-zava-platinum font-sans antialiased selection:bg-zava-sand selection:text-zava-night overflow-hidden">
+
+  <!-- =========================================================================
+       1. CONTAINER DO MAPA 3D (FUNDO EM TELA INTEIRA)
+       Ocupa 100% da viewport dinâmica (100dvh). Na Fase 2 exibirá todas as
+       quadras e lotes do Jardins Itália em Grafite/Azul-Noite com destaque para
+       a carteira Zava por tipologia e áreas de lazer.
+       ========================================================================= -->
+  <main id="canvas-container" aria-label="Mapa 3D Interativo do Condomínio Jardins Itália">
+    <!-- Placeholder central de contexto enquanto o motor WebGL/Three.js não é acoplado -->
+    <div id="canvas-placeholder" class="flex flex-col items-center justify-center text-center px-6 pointer-events-none select-none">
+      <div class="w-16 h-16 rounded-2xl border border-zava-sand/35 flex items-center justify-center mb-4 bg-zava-graphite/35 shadow-[0_0_32px_rgba(210,194,172,0.14)]">
+        <svg class="w-7 h-7 text-zava-sand" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+        </svg>
+      </div>
+      <span class="text-[11px] uppercase tracking-[0.26em] text-zava-sand font-semibold mb-1.5">
+        Base Geográfica 3D • Jardins Itália
+      </span>
+      <p class="text-xs sm:text-sm text-zava-silver max-w-sm font-normal leading-relaxed">
+        Container <code class="text-zava-platinum font-mono">#canvas-container</code> preparado para renderizar quadras em Grafite e destacar imóveis da curadoria Zava.
+      </p>
+      <!-- Indicador dinâmico do filtro selecionado na barra inferior -->
+      <div class="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zava-graphite/40 border border-zava-sand/20 text-[11px] text-zava-silver">
+        <span>Filtro ativo:</span>
+        <strong id="active-filter-badge" class="text-zava-sand font-semibold">Todos</strong>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       2. INTERFACE SOBREPOSTA (HUD GLASSMORPHISM)
+       Camada fixa com pointer-events-none para deixar o toque passar para o mapa 3D,
+       ativando pointer-events-auto apenas nos painéis do topo e rodapé.
+       ========================================================================= -->
+  <div id="hud-overlay" class="fixed inset-0 z-10 pointer-events-none flex flex-col justify-between safe-viewport-padding">
+
+    <!-- TOPO FLUTUANTE: Emblema "Z" + Marca ZAVA VISIT + Seletor do Condomínio -->
+    <header class="w-full max-w-5xl mx-auto flex items-center justify-between gap-3 pointer-events-auto">
+      <div class="glass-panel w-full px-3.5 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl flex items-center justify-between gap-3">
+        
+        <!-- Identidade Oficial Zava Imobiliária: Emblema Geométrico "Z" + Título -->
+        <div class="flex items-center gap-3 sm:gap-3.5">
+          <!-- Emblema geométrico minimalista com símbolo "Z" em Areia (#d2c2ac) sob fundo Azul-Noite/Grafite -->
+          <div
+            class="zava-emblem w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0"
+            aria-hidden="true"
+          >
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-zava-sand" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Moldura geométrica chanfrada sutil -->
+              <path d="M6 4H26L28 6V26L26 28H6L4 26V6L6 4Z" stroke="currentColor" stroke-width="1.25" stroke-opacity="0.35" />
+              <!-- Símbolo "Z" minimalista arquitetônico -->
+              <path d="M9.5 10.5H22.5L10.5 21.5H22.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter" />
+              <circle cx="22.5" cy="10.5" r="1.3" fill="currentColor" />
+            </svg>
+          </div>
+
+          <div>
+            <h1 class="font-brand text-base sm:text-xl font-bold tracking-[0.2em] text-zava-platinum leading-none">
+              ZAVA <span class="text-zava-sand font-semibold">VISIT</span>
+            </h1>
+            <p class="text-[10px] sm:text-xs text-zava-silver tracking-[0.14em] uppercase mt-1 font-medium">
+              Curadoria Imobiliária 3D
+            </p>
+          </div>
+        </div>
+
+        <!-- Seletor / Indicador do Condomínio Consolidado -->
+        <button
+          id="condo-selector-btn"
+          type="button"
+          class="group flex items-center gap-2.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-zava-night/60 hover:bg-zava-graphite/60 active:scale-[0.98] border border-zava-sand/30 hover:border-zava-sand/65 transition-all duration-200"
+          aria-label="Condomínio selecionado: Jardins Itália"
+        >
+          <!-- Ponto luminoso em tom Areia -->
+          <span class="flex h-2 w-2 relative shrink-0" aria-hidden="true">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-zava-sand opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-zava-sand"></span>
+          </span>
+
+          <div class="text-left">
+            <span class="block text-[9px] uppercase tracking-[0.16em] text-zava-silver leading-none font-medium">
+              Condomínio
+            </span>
+            <span id="current-condo-name" class="block text-xs sm:text-sm font-semibold text-zava-platinum group-hover:text-zava-sand transition-colors mt-0.5">
+              Jardins Itália
+            </span>
+          </div>
+
+          <svg class="w-4 h-4 text-zava-sand/75 group-hover:text-zava-sand transition-transform duration-200 group-hover:translate-y-0.5 ml-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </button>
+
+      </div>
+    </header>
+
+    <!-- RODAPÉ FLUTUANTE INTERATIVO: Filtro por Tipologia da Carteira & Áreas de Lazer -->
+    <footer class="w-full max-w-4xl mx-auto pointer-events-auto">
+      <nav
+        aria-label="Filtro de tipologias de imóveis e áreas de lazer"
+        class="glass-panel p-1.5 sm:p-2 rounded-2xl"
+      >
+        <!-- Container com scroll horizontal suave em telas pequenas e sem scrollbar visível -->
+        <div
+          id="category-filter-bar"
+          role="tablist"
+          aria-label="Categorias do mapa 3D"
+          class="no-scrollbar flex items-center gap-1.5 sm:gap-2 overflow-x-auto scroll-smooth px-0.5 py-0.5 sm:justify-center"
+        >
+          <!-- 1. Todos (Ativo por padrão) -->
+          <button
+            type="button"
+            role="tab"
+            aria-selected="true"
+            data-category="todos"
+            data-label="Todos"
+            class="category-btn is-active shrink-0 flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200"
+          >
+            <span class="category-dot category-dot--all" aria-hidden="true"></span>
+            <span>Todos</span>
+          </button>
+
+          <!-- 2. Casas Térreas (Indicador em Areia #d2c2ac) -->
+          <button
+            type="button"
+            role="tab"
+            aria-selected="false"
+            data-category="casas-terreas"
+            data-label="Casas Térreas"
+            class="category-btn shrink-0 flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200"
+          >
+            <span class="category-dot category-dot--sand" aria-hidden="true"></span>
+            <span>Casas Térreas</span>
+          </button>
+
+          <!-- 3. Sobrados (Indicador em Platina #e6e6e6) -->
+          <button
+            type="button"
+            role="tab"
+            aria-selected="false"
+            data-category="sobrados"
+            data-label="Sobrados"
+            class="category-btn shrink-0 flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200"
+          >
+            <span class="category-dot category-dot--platinum" aria-hidden="true"></span>
+            <span>Sobrados</span>
+          </button>
+
+          <!-- 4. Triplex (Indicador em Dourado Pálido/Champagne #e5d5c0 com brilho sutil) -->
+          <button
+            type="button"
+            role="tab"
+            aria-selected="false"
+            data-category="triplex"
+            data-label="Triplex"
+            class="category-btn shrink-0 flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200"
+          >
+            <span class="category-dot category-dot--champagne" aria-hidden="true"></span>
+            <span>Triplex</span>
+          </button>
+
+          <!-- 5. Lotes (Indicador em Prata #b1b2b5 com borda Areia #d2c2ac) -->
+          <button
+            type="button"
+            role="tab"
+            aria-selected="false"
+            data-category="lotes"
+            data-label="Lotes"
+            class="category-btn shrink-0 flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200"
+          >
+            <span class="category-dot category-dot--lots" aria-hidden="true"></span>
+            <span>Lotes</span>
+          </button>
+
+          <!-- 6. Áreas de Lazer (Indicador em Verde Esmeralda/Água sofisticado #34d399) -->
+          <button
+            type="button"
+            role="tab"
+            aria-selected="false"
+            data-category="areas-lazer"
+            data-label="Áreas de Lazer"
+            class="category-btn shrink-0 flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200"
+          >
+            <span class="category-dot category-dot--leisure" aria-hidden="true"></span>
+            <span>Áreas de Lazer</span>
+          </button>
+        </div>
+      </nav>
+    </footer>
+
+  </div>
+
+  <!-- Script principal da aplicação -->
+  <script src="js/main.js"></script>
+</body>
+</html>
